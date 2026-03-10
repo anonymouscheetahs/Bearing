@@ -2,265 +2,512 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Endless Candy Halls — Easier Maze</title>
+<title>Endless Candy Halls</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
+
 :root{
   --bg:#0b0e1a;
   --accent:#3a4091;
 }
-html,body{height:100%;margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#e6eefc;overflow-y:auto;}
-#game{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px;gap:6px;}
-h1{margin:4px 0;font-size:1.6em;text-align:center;text-shadow:0 0 6px var(--accent);}
-#timer{margin:2px 0;font-weight:600;color:#b4ffb4;font-size:1em;}
-#doors{position:relative;width:160px;height:160px;margin:10px 0;}
-.door-img{position:absolute;width:50px;height:75px;cursor:pointer;transition:transform .3s, opacity .4s; user-select:none;}
-.door-img:hover{transform:scale(1.2);box-shadow:0 0 25px #ffffffaa;}
-#candies{display:flex;flex-direction:row;align-items:center;gap:8px;margin-top:4px;justify-content:center;flex-wrap:nowrap;}
-.candy{font-size:28px;opacity:.25;transition:transform .3s, opacity .3s;text-align:center;}
-.candy.found{opacity:1;transform:translateY(-2px);}
-.candy .info{font-size:10px;color:#bfc6ff;opacity:.9;margin-top:2px;text-align:center;}
-#compassRow{display:flex;gap:6px;justify-content:center;}
-.compass{width:40px;height:40px;border-radius:50%;background:#151836;border:2px solid var(--accent);position:relative;display:flex;align-items:center;justify-content:center;}
-.needle{width:2px;height:18px;background:#ff4d4d;position:absolute;top:6px;left:50%;transform-origin:bottom;transform:translateX(-50%) rotate(0deg);transition:transform 0.3s ease;}
-.tick{position:absolute;bottom:2px;font-size:10px;color:#4ade80;display:none;}
-.compass.done .tick{display:block;}
-#minimapWrap{position:fixed;right:10px;top:10px;width:150px;height:150px;border-radius:999px;background:linear-gradient(180deg,#0e1230,#0b0e1a);display:flex;align-items:center;justify-content:center;border:3px solid rgba(60,65,148,0.9);}
-#minimapCanvas{border-radius:999px;display:block;}
-#status{margin:4px 0 0 0;font-weight:600;color:#cfd6ff;font-size:0.9em;text-align:center;}
-button{margin-top:8px;padding:6px 12px;border:none;border-radius:4px;background:#3a4091;color:#fff;font-weight:600;cursor:pointer;}
-button:hover{background:#5056d4;}
+
+body{
+margin:0;
+font-family:Arial;
+background:var(--bg);
+color:white;
+display:flex;
+justify-content:center;
+}
+
+#game{
+width:100%;
+max-width:500px;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:10px;
+gap:8px;
+}
+
+h1{
+margin:5px;
+text-shadow:0 0 6px var(--accent);
+}
+
+#timer{
+color:#b4ffb4;
+font-weight:bold;
+}
+
+#doors{
+position:relative;
+width:80vw;
+max-width:260px;
+aspect-ratio:1;
+}
+
+.door-img{
+position:absolute;
+width:70px;
+height:100px;
+cursor:pointer;
+transition:.25s;
+}
+
+.door-img:active{
+transform:scale(.9);
+}
+
+#candies{
+display:flex;
+gap:8px;
+justify-content:center;
+}
+
+.candy{
+font-size:28px;
+opacity:.3;
+text-align:center;
+}
+
+.candy .info{
+font-size:11px;
+color:#aaa;
+}
+
+.candy.found{
+opacity:1;
+}
+
+#compassRow{
+display:flex;
+gap:6px;
+}
+
+.compass{
+width:40px;
+height:40px;
+border-radius:50%;
+background:#151836;
+border:2px solid var(--accent);
+position:relative;
+}
+
+.needle{
+width:2px;
+height:18px;
+background:red;
+position:absolute;
+top:6px;
+left:50%;
+transform-origin:bottom;
+}
+
+.tick{
+position:absolute;
+bottom:0;
+left:50%;
+transform:translateX(-50%);
+display:none;
+}
+
+.compass.done .tick{
+display:block;
+}
+
+#status{
+font-size:.9em;
+}
+
+button{
+padding:6px 12px;
+background:#3a4091;
+border:none;
+color:white;
+border-radius:4px;
+}
+
+#minimapWrap{
+position:fixed;
+right:10px;
+top:10px;
+width:130px;
+height:130px;
+border-radius:50%;
+border:3px solid #3a4091;
+overflow:hidden;
+}
+
+canvas{
+width:100%;
+height:100%;
+}
+
+/* Mobile controls */
+
+#controls{
+display:grid;
+grid-template-columns:60px 60px 60px;
+gap:6px;
+margin-top:10px;
+}
+
+.ctrl{
+background:#1b1f4f;
+border-radius:8px;
+font-size:20px;
+display:flex;
+justify-content:center;
+align-items:center;
+height:50px;
+user-select:none;
+}
+
+.ctrl:active{
+background:#3a4091;
+}
+
+@media (min-width:700px){
+
+#controls{
+display:none;
+}
+
+}
+
 </style>
 </head>
+
 <body>
+
 <div id="game">
-  <h1>Endless Candy Halls</h1>
-  <div id="timer">Time: 0.0s</div>
-  <div id="compassRow"></div>
-  <div id="doors"></div>
-  <div id="candies"></div>
-  <h2 id="status">Navigate the halls and find the candy.</h2>
+
+<h1>Endless Candy Halls</h1>
+
+<div id="timer">Time: 0.0s</div>
+
+<div id="compassRow"></div>
+
+<div id="doors"></div>
+
+<div id="candies"></div>
+
+<div id="status"></div>
+
+<div id="controls">
+
+<div></div>
+<div class="ctrl" onclick="move(0,-1)">⬆</div>
+<div></div>
+
+<div class="ctrl" onclick="move(-1,0)">⬅</div>
+<div></div>
+<div class="ctrl" onclick="move(1,0)">➡</div>
+
+<div></div>
+<div class="ctrl" onclick="move(0,1)">⬇</div>
+<div></div>
+
 </div>
+
+</div>
+
 <div id="minimapWrap">
-  <canvas id="minimapCanvas" width="150" height="150"></canvas>
+<canvas id="minimapCanvas" width="150" height="150"></canvas>
 </div>
 
 <script>
-const SIZE = 10;
-const candyIcons=["🍬","🍭","🍫","🍩","🍪"];
-const canvas=document.getElementById('minimapCanvas');
-const ctx=canvas.getContext('2d');
 
-let player, visited, maze, candyLocations, candiesFound;
-let timerInterval, startTime;
+const SIZE=10
+const candyIcons=["🍬","🍭","🍫","🍩","🍪"]
+
+const canvas=document.getElementById("minimapCanvas")
+const ctx=canvas.getContext("2d")
+
+let player,visited,maze,candyLocations,candiesFound
+let timerInterval,startTime
 
 function initGame(){
-  player={x:5,y:5,dirX:0,dirY:-1};
-  visited=new Set([player.x+','+player.y]);
-  maze=[];
-  candyLocations=[];
-  candiesFound=[false,false,false,false,false];
-  clearInterval(timerInterval);
-  startTime=null;
-  document.getElementById('timer').textContent = 'Time: 0.0s';
-  generateMaze();
-  placeCandies();
-  renderAll();
-}
-initGame();
 
-// Easier maze
+player={x:5,y:5,dirX:0,dirY:-1}
+visited=new Set([player.x+","+player.y])
+
+maze=[]
+candyLocations=[]
+candiesFound=[false,false,false,false,false]
+
+clearInterval(timerInterval)
+startTime=null
+
+generateMaze()
+placeCandies()
+renderAll()
+
+}
+
+initGame()
+
 function generateMaze(){
-  maze=Array.from({length:SIZE},()=>Array.from({length:SIZE},()=>({n:true,s:true,e:true,w:true})));
-  const stack=[[player.x,player.y]];
-  const seen=new Set([player.x+','+player.y]);
-  while(stack.length){
-    const [cx,cy]=stack[stack.length-1];
-    const neighbors=[];
-    if(cy>0&&!seen.has(cx+','+(cy-1))) neighbors.push([cx,cy-1,'n','s']);
-    if(cy<SIZE-1&&!seen.has(cx+','+(cy+1))) neighbors.push([cx,cy+1,'s','n']);
-    if(cx>0&&!seen.has((cx-1)+','+cy)) neighbors.push([cx-1,cy,'w','e']);
-    if(cx<SIZE-1&&!seen.has((cx+1)+','+cy)) neighbors.push([cx+1,cy,'e','w']);
-    if(neighbors.length===0){stack.pop();continue;}
-    const [nx,ny,dir,opp]=neighbors[Math.floor(Math.random()*neighbors.length)];
-    maze[cy][cx][dir]=false; maze[ny][nx][opp]=false;
-    seen.add(nx+','+ny); stack.push([nx,ny]);
-    // Extra open walls for easier maze
-    if(Math.random()<0.4){
-      const extras=[];
-      if(cy>0) extras.push([cx,cy-1,'n','s']);
-      if(cy<SIZE-1) extras.push([cx,cy+1,'s','n']);
-      if(cx>0) extras.push([cx-1,cy,'w','e']);
-      if(cx<SIZE-1) extras.push([cx+1,cy,'e','w']);
-      if(extras.length>0){
-        const [ex,ey,edir,eopp]=extras[Math.floor(Math.random()*extras.length)];
-        maze[cy][cx][edir]=false; maze[ey][ex][eopp]=false;
-      }
-    }
-  }
+
+maze=Array.from({length:SIZE},()=>Array.from({length:SIZE},()=>({n:true,s:true,e:true,w:true})))
+
+const stack=[[player.x,player.y]]
+const seen=new Set([player.x+","+player.y])
+
+while(stack.length){
+
+const [cx,cy]=stack[stack.length-1]
+const neighbors=[]
+
+if(cy>0&&!seen.has(cx+","+(cy-1))) neighbors.push([cx,cy-1,"n","s"])
+if(cy<SIZE-1&&!seen.has(cx+","+(cy+1))) neighbors.push([cx,cy+1,"s","n"])
+if(cx>0&&!seen.has((cx-1)+","+cy)) neighbors.push([cx-1,cy,"w","e"])
+if(cx<SIZE-1&&!seen.has((cx+1)+","+cy)) neighbors.push([cx+1,cy,"e","w"])
+
+if(neighbors.length===0){stack.pop();continue}
+
+const [nx,ny,dir,opp]=neighbors[Math.floor(Math.random()*neighbors.length)]
+
+maze[cy][cx][dir]=false
+maze[ny][nx][opp]=false
+
+seen.add(nx+","+ny)
+stack.push([nx,ny])
+
 }
 
-// Candies
+}
+
 function placeCandies(){
-  candyLocations=[];
-  while(candyLocations.length<5){
-    let x=Math.floor(Math.random()*SIZE);
-    let y=Math.floor(Math.random()*SIZE);
-    if((x===player.x&&y===player.y)||candyLocations.some(c=>c.x===x&&c.y===y)) continue;
-    candyLocations.push({x,y});
-  }
+
+while(candyLocations.length<5){
+
+let x=Math.floor(Math.random()*SIZE)
+let y=Math.floor(Math.random()*SIZE)
+
+if((x===player.x&&y===player.y)||candyLocations.some(c=>c.x===x&&c.y===y)) continue
+
+candyLocations.push({x,y})
+
+}
+
 }
 
 function renderAll(){
-  renderDoors();
-  renderCandiesUI();
-  renderCompassRow();
-  renderMinimap();
-  updateStatus();
+
+renderDoors()
+renderCandiesUI()
+renderCompassRow()
+renderMinimap()
+updateStatus()
+
 }
 
 function renderDoors(){
-  const doorsDiv=document.getElementById('doors');
-  doorsDiv.innerHTML='';
-  const cell=maze[player.y][player.x];
-  const offsets={n:[55,0],s:[55,70],e:[100,35],w:[10,35]};
-  if(!cell.n) createDoor('n',offsets.n);
-  if(!cell.s) createDoor('s',offsets.s);
-  if(!cell.e) createDoor('e',offsets.e);
-  if(!cell.w) createDoor('w',offsets.w);
+
+const doors=document.getElementById("doors")
+doors.innerHTML=""
+
+const cell=maze[player.y][player.x]
+
+const pos={
+n:["50%","0%"],
+s:["50%","80%"],
+e:["80%","40%"],
+w:["0%","40%"]
+}
+
+if(!cell.n) createDoor("n",pos.n)
+if(!cell.s) createDoor("s",pos.s)
+if(!cell.e) createDoor("e",pos.e)
+if(!cell.w) createDoor("w",pos.w)
+
 }
 
 function createDoor(dir,[left,top]){
-  const doorsDiv=document.getElementById('doors');
-  const img=document.createElement('img');
-  img.src='door.png';
-  img.className='door-img';
-  img.style.left=left+'%';
-  img.style.top=top+'%';
-  img.onclick=()=>{
-    img.style.opacity=0;
-    setTimeout(()=>{
-      let dx=0,dy=0;
-      if(dir==='n') dy=-1;if(dir==='s') dy=1;if(dir==='e') dx=1;if(dir==='w') dx=-1;
-      move(dx,dy); img.style.opacity=1;
-    },200);
-  };
-  doorsDiv.appendChild(img);
+
+const img=document.createElement("img")
+img.src="door.png"
+img.className="door-img"
+
+img.style.left=left
+img.style.top=top
+
+img.onclick=()=>{
+
+let dx=0,dy=0
+
+if(dir==="n")dy=-1
+if(dir==="s")dy=1
+if(dir==="e")dx=1
+if(dir==="w")dx=-1
+
+move(dx,dy)
+
 }
 
-// --- Move ---
+document.getElementById("doors").appendChild(img)
+
+}
+
 function move(dx,dy){
-  if(!startTime) startTimer(); // start timer on first move
-  const targetX=player.x+dx;
-  const targetY=player.y+dy;
-  if(targetX<0||targetX>=SIZE||targetY<0||targetY>=SIZE) return;
-  player.x=targetX; player.y=targetY; player.dirX=dx; player.dirY=dy;
-  visited.add(player.x+','+player.y);
-  checkCandy();
-  renderAll();
+
+if(!startTime) startTimer()
+
+const tx=player.x+dx
+const ty=player.y+dy
+
+if(tx<0||ty<0||tx>=SIZE||ty>=SIZE) return
+
+player.x=tx
+player.y=ty
+player.dirX=dx
+player.dirY=dy
+
+visited.add(tx+","+ty)
+
+checkCandy()
+renderAll()
+
 }
 
 function checkCandy(){
-  candyLocations.forEach((loc,i)=>{if(!candiesFound[i]&&player.x===loc.x&&player.y===loc.y) candiesFound[i]=true;});
+
+candyLocations.forEach((loc,i)=>{
+
+if(!candiesFound[i]&&loc.x===player.x&&loc.y===player.y)
+candiesFound[i]=true
+
+})
+
 }
 
-// --- UI ---
 function renderCandiesUI(){
-  const bar=document.getElementById('candies'); bar.innerHTML='';
-  candyLocations.forEach((loc,i)=>{
-    const div=document.createElement('div'); div.className='candy';
-    div.textContent=candyIcons[i];
-    const info=document.createElement('div'); info.className='info';
-    if(!candiesFound[i]){
-      const bearing=Math.round(getBearing(player,loc));
-      const distance=Math.abs(loc.x-player.x)+Math.abs(loc.y-player.y);
-      info.textContent=`${bearing}° ${distance}`;
-    } else info.textContent='✔';
-    div.appendChild(info); bar.appendChild(div);
-  });
+
+const bar=document.getElementById("candies")
+bar.innerHTML=""
+
+candyLocations.forEach((loc,i)=>{
+
+const div=document.createElement("div")
+div.className="candy"+(candiesFound[i]?" found":"")
+
+div.innerHTML=candyIcons[i]+"<div class='info'>"+(candiesFound[i]?"✔":Math.abs(loc.x-player.x)+Math.abs(loc.y-player.y))+"</div>"
+
+bar.appendChild(div)
+
+})
+
 }
 
 function renderCompassRow(){
-  const row=document.getElementById('compassRow'); row.innerHTML='';
-  candyLocations.forEach((loc,i)=>{
-    const comp=document.createElement('div'); comp.className='compass'+(candiesFound[i]?' done':'');
-    const needle=document.createElement('div'); needle.className='needle';
-    needle.style.transform=`translateX(-50%) rotate(${getBearing(player,loc)}deg)`;
-    const tick=document.createElement('div'); tick.className='tick'; tick.textContent='✔';
-    comp.appendChild(needle); comp.appendChild(tick); row.appendChild(comp);
-  });
+
+const row=document.getElementById("compassRow")
+row.innerHTML=""
+
+candyLocations.forEach((loc,i)=>{
+
+const c=document.createElement("div")
+c.className="compass"+(candiesFound[i]?" done":"")
+
+const n=document.createElement("div")
+n.className="needle"
+
+const angle=getBearing(player,loc)
+
+n.style.transform="translateX(-50%) rotate("+angle+"deg)"
+
+const tick=document.createElement("div")
+tick.className="tick"
+tick.innerText="✔"
+
+c.appendChild(n)
+c.appendChild(tick)
+
+row.appendChild(c)
+
+})
+
 }
 
 function renderMinimap(){
-  const SIZE_CANVAS=canvas.width;
-  ctx.clearRect(0,0,SIZE_CANVAS,SIZE_CANVAS);
-  const radius=2;
-  const cellSize=SIZE_CANVAS/(radius*2+1);
-  ctx.save(); ctx.beginPath(); ctx.arc(SIZE_CANVAS/2,SIZE_CANVAS/2,SIZE_CANVAS/2-2,0,Math.PI*2); ctx.clip();
-  ctx.fillStyle='rgba(8,10,22,1)'; ctx.fillRect(0,0,SIZE_CANVAS,SIZE_CANVAS);
-  for(let dy=-radius;dy<=radius;dy++){
-    for(let dx=-radius;dx<=radius;dx++){
-      const x=player.x+dx; const y=player.y+dy;
-      if(x<0||x>=SIZE||y<0||y>=SIZE) continue;
-      const cx=(dx+radius)*cellSize, cy=(dy+radius)*cellSize;
-      ctx.fillStyle=visited.has(x+','+y)?'#2e3568':'#0d0f1a';
-      ctx.fillRect(cx,cy,cellSize-1,cellSize-1);
-      candyLocations.forEach((loc,i)=>{if(candiesFound[i]&&loc.x===x&&loc.y===y){
-        ctx.font=Math.max(10,cellSize*0.5)+'px sans-serif';
-        ctx.fillText('🍬',cx+cellSize/4,cy+cellSize/1.5);
-      }});
-    }
-  }
-  drawPlayerArrow(SIZE_CANVAS/2,SIZE_CANVAS/2);
-  ctx.restore();
+
+ctx.clearRect(0,0,150,150)
+
+ctx.fillStyle="#1a1f44"
+
+visited.forEach(v=>{
+
+const [x,y]=v.split(",").map(Number)
+
+ctx.fillRect(x*15,y*15,14,14)
+
+})
+
+ctx.fillStyle="white"
+ctx.fillRect(player.x*15,player.y*15,10,10)
+
 }
 
-function drawPlayerArrow(x,y){
-  const arrowLen=10;
-  const angleRad=degToRad(getHeadingFromDir(player.dirX,player.dirY));
-  ctx.save(); ctx.translate(x,y); ctx.rotate(angleRad);
-  ctx.beginPath(); ctx.moveTo(0,-arrowLen); ctx.lineTo(arrowLen*0.5,arrowLen*0.9); ctx.lineTo(-arrowLen*0.5,arrowLen*0.9); ctx.closePath();
-  ctx.fillStyle='#ffffff'; ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=3; ctx.fill(); ctx.restore();
+function getBearing(a,b){
+
+return (Math.atan2(b.x-a.x,-(b.y-a.y))*180/Math.PI+360)%360
+
 }
 
-// Math
-function getBearing(a,b){return (Math.atan2(b.x-a.x,-(b.y-a.y))*180/Math.PI+360)%360;}
-function getHeadingFromDir(dx,dy){return (Math.atan2(dx,-dy)*180/Math.PI+360)%360;}
-function degToRad(d){return d*Math.PI/180;}
-
-// Status & win
 function updateStatus(){
-  const status=document.getElementById('status');
-  if(candiesFound.every(Boolean)){
-    stopTimer();
-    status.innerHTML=`🎉 You collected all candies!<br>Time: ${getElapsedTime()}s`;
-    const btn=document.createElement('button');
-    btn.textContent='Play Again';
-    btn.onclick=()=>initGame();
-    status.appendChild(btn);
-  } else {
-    status.textContent='Candies remaining: '+candiesFound.filter(f=>!f).length;
-  }
+
+const s=document.getElementById("status")
+
+if(candiesFound.every(Boolean)){
+
+stopTimer()
+
+s.innerHTML="🎉 You found all candy!<br>Time: "+getElapsed()+"s <br><button onclick='initGame()'>Play Again</button>"
+
+}else{
+
+s.innerText="Candies remaining: "+candiesFound.filter(f=>!f).length
+
 }
 
-// Timer
+}
+
 function startTimer(){
-  startTime = Date.now();
-  timerInterval = setInterval(()=>{
-    const elapsed = ((Date.now()-startTime)/1000).toFixed(1);
-    document.getElementById('timer').textContent = `Time: ${elapsed}s`;
-  },100);
-}
-function stopTimer(){ clearInterval(timerInterval); }
-function getElapsedTime(){ return ((Date.now()-startTime)/1000).toFixed(1); }
 
-// Controls
-window.addEventListener('keydown',e=>{
-  if(e.key==='ArrowUp'||e.key==='w') move(0,-1);
-  else if(e.key==='ArrowDown'||e.key==='s') move(0,1);
-  else if(e.key==='ArrowLeft'||e.key==='a') move(-1,0);
-  else if(e.key==='ArrowRight'||e.key==='d') move(1,0);
-});
+startTime=Date.now()
+
+timerInterval=setInterval(()=>{
+
+document.getElementById("timer").innerText="Time: "+getElapsed()+"s"
+
+},100)
+
+}
+
+function stopTimer(){
+
+clearInterval(timerInterval)
+
+}
+
+function getElapsed(){
+
+return ((Date.now()-startTime)/1000).toFixed(1)
+
+}
+
+window.addEventListener("keydown",e=>{
+
+if(e.key==="ArrowUp"||e.key==="w") move(0,-1)
+if(e.key==="ArrowDown"||e.key==="s") move(0,1)
+if(e.key==="ArrowLeft"||e.key==="a") move(-1,0)
+if(e.key==="ArrowRight"||e.key==="d") move(1,0)
+
+})
+
 </script>
 </body>
 </html>
